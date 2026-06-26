@@ -1,0 +1,2385 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>E-Derma – Real-Time Skin Analysis</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root{
+      --bg:#020617;--card:#020617;--text:#e5e7eb;--muted:#9ca3af;
+      --accent:#22c55e;--accent-soft:#14532d;
+      --primary:#38bdf8;--border:#1f2937;
+      --error:#ef4444;--warning:#f59e0b;--success:#10b981;
+    }
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font-family:system-ui,Segoe UI,Arial;
+      color:var(--text);
+      background:
+        linear-gradient(135deg, rgba(15,23,42,0.92), rgba(15,23,42,0.85)),
+        url("https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=1600&q=80")
+        center/cover fixed no-repeat;
+      min-height:100vh;
+    }
+
+    .shell{
+      max-width:1200px;
+      margin:0 auto;
+      padding:18px 16px 32px;
+    }
+
+    header{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:14px;gap:10px;flex-wrap:wrap;
+    }
+
+    .logo{
+      display:flex;align-items:center;gap:8px;
+    }
+    .logo-badge{
+      width:36px;height:36px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      background:radial-gradient(circle,#22c55e,#15803d);
+      box-shadow:0 0 24px rgba(34,197,94,0.6);
+      font-weight:700;font-size:16px;color:#022c22;
+    }
+    h1{margin:0;font-size:24px;font-weight:800;}
+    .sub{color:var(--muted);margin-top:2px;font-size:13px;}
+    .pill{
+      padding:4px 10px;border-radius:999px;
+      border:1px solid rgba(148,163,184,0.5);
+      font-size:11px;color:var(--muted);
+      background:rgba(15,23,42,0.85);
+      backdrop-filter:blur(10px);
+    }
+
+    .nav-buttons{
+      display:flex;gap:8px;flex-wrap:wrap;
+    }
+
+    .card{
+      background:linear-gradient(145deg,rgba(15,23,42,0.92),rgba(15,23,42,0.8));
+      border-radius:16px;
+      padding:16px;
+      border:1px solid rgba(148,163,184,0.35);
+      box-shadow:0 22px 45px rgba(0,0,0,0.6);
+      margin-bottom:16px;
+      backdrop-filter:blur(14px);
+    }
+
+    .grid{display:grid;gap:16px;}
+    @media(min-width:900px){.grid{grid-template-columns:1.1fr 1fr;}}
+
+    label{display:block;margin-top:8px;font-size:13px;font-weight:500;}
+    input,select,textarea{
+      width:100%;margin-top:4px;padding:8px 10px;border-radius:10px;
+      border:1px solid rgba(148,163,184,0.7);background:#020617;color:var(--text);
+      font-size:14px;
+    }
+    input:focus,select:focus,textarea:focus{outline:1px solid #22c55e;border-color:#22c55e;}
+    
+    .input-error{border-color:var(--error)!important;}
+    .error-message{color:var(--error);font-size:12px;margin-top:4px;}
+    .success-message{color:var(--success);font-size:12px;margin-top:4px;}
+    .warning-message{color:var(--warning);font-size:12px;margin-top:4px;}
+
+    button{
+      border:none;border-radius:999px;padding:9px 15px;
+      font-weight:600;cursor:pointer;font-size:14px;
+      display:inline-flex;align-items:center;gap:4px;
+      transition:all 0.2s;
+    }
+    button:disabled{opacity:0.6;cursor:not-allowed;}
+    .primary{background:var(--accent);color:#052e16;}
+    .secondary{background:var(--primary);color:#082f49;}
+    .ghost{background:rgba(148,163,184,0.15);color:var(--text);}
+    .danger{background:var(--error);color:white;}
+    .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+    .muted{color:var(--muted);font-size:13px;}
+
+    video,img{
+      width:100%;border-radius:12px;
+      border:1px solid rgba(148,163,184,0.4);
+      background:#020617;
+    }
+
+    .tag{
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:12px;
+      background:rgba(34,197,94,0.16);
+      border:1px solid rgba(34,197,94,0.45);
+      color:#bbf7d0;
+      margin:2px;
+    }
+    .bar{height:6px;background:#020617;border-radius:999px;overflow:hidden;margin-top:3px;}
+    .bar>div{height:100%;background:linear-gradient(90deg,#22c55e,#38bdf8);}
+
+    .product{
+      margin-top:8px;padding:9px;border-radius:10px;
+      background:rgba(15,23,42,0.98);
+      border:1px solid rgba(148,163,184,0.35);
+    }
+    .product-title{font-weight:600;font-size:14px;}
+    a{color:#a5b4fc;text-decoration:none;font-size:13px;}
+
+    .banner{
+      margin-top:10px;
+      padding:10px;
+      border-radius:10px;
+      background:rgba(34,197,94,0.12);
+      border:1px solid rgba(34,197,94,0.5);
+      font-size:13px;
+    }
+
+    .chip{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:3px 10px;border-radius:999px;
+      background:rgba(15,23,42,0.9);border:1px solid rgba(148,163,184,0.4);
+      font-size:11px;color:var(--muted);
+    }
+
+    .login-grid{
+      display:grid;
+      grid-template-columns: minmax(0,1.2fr) minmax(0,1fr);
+      gap:16px;
+    }
+    @media(max-width:780px){
+      .login-grid{grid-template-columns:1fr;}
+    }
+
+    .login-side-visual{
+      border-radius:12px;
+      padding:10px;
+      background:rgba(15,23,42,0.65);
+      border:1px dashed rgba(148,163,184,0.4);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+    .login-side-visual img{
+      width:100%;
+      max-width:260px;
+      border-radius:12px;
+      border:1px solid rgba(148,163,184,0.4);
+      display:block;
+    }
+    .login-side-visual-caption{
+      font-size:12px;
+      color:var(--muted);
+      text-align:center;
+    }
+
+    /* Tab system */
+    .tabs{
+      display:flex;
+      gap:4px;
+      margin-bottom:16px;
+      border-bottom:1px solid rgba(148,163,184,0.2);
+    }
+    .tab{
+      padding:8px 16px;
+      border:none;
+      background:transparent;
+      color:var(--muted);
+      cursor:pointer;
+      border-radius:8px 8px 0 0;
+      font-size:14px;
+    }
+    .tab.active{
+      background:rgba(34,197,94,0.1);
+      color:var(--accent);
+      border-bottom:2px solid var(--accent);
+    }
+    .tab:disabled{
+      opacity:0.5;
+      cursor:not-allowed;
+    }
+
+    /* Password strength indicator */
+    .password-strength{
+      margin-top:4px;
+      font-size:11px;
+    }
+    .strength-weak{color:var(--error);}
+    .strength-medium{color:var(--warning);}
+    .strength-strong{color:var(--success);}
+
+    /* Progress indicator */
+    .progress-steps{
+      display:flex;
+      justify-content:center;
+      gap:8px;
+      margin-bottom:20px;
+    }
+    .step{
+      width:12px;height:12px;
+      border-radius:50%;
+      background:rgba(148,163,184,0.3);
+      position:relative;
+    }
+    .step.active{background:var(--accent);}
+    .step.completed{background:var(--success);}
+
+    /* Status indicators for dermatologists */
+    .status-open{background:rgba(16,185,129,0.2);color:var(--success);}
+    .status-closed{background:rgba(239,68,68,0.2);color:var(--error);}
+    .status-unknown{background:rgba(148,163,184,0.2);color:var(--muted);}
+
+    /* Loading spinner */
+    .spinner{
+      width:16px;height:16px;
+      border:2px solid rgba(148,163,184,0.3);
+      border-top:2px solid var(--accent);
+      border-radius:50%;
+      animation:spin 1s linear infinite;
+    }
+    @keyframes spin{
+      0%{transform:rotate(0deg);}
+      100%{transform:rotate(360deg);}
+    }
+
+    /* Responsive improvements */
+    @media(max-width:600px){
+      .shell{padding:12px 8px 24px;}
+      h1{font-size:20px;}
+      .nav-buttons{justify-content:center;}
+      .tabs{flex-wrap:wrap;}
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="logo">
+        <div class="logo-badge">E</div>
+        <div>
+          <h1>E-Derma – AI Skin Analysis Platform</h1>
+          <div class="sub">
+            Register → Login → Complete Profile → AI Analysis → Get Recommendations
+          </div>
+        </div>
+      </div>
+      <div class="nav-buttons">
+        <div class="pill">Academic Prototype • Not a medical device</div>
+        <button class="ghost" onclick="showAbout()">ℹ️ About</button>
+      </div>
+    </header>
+
+    <!-- Progress Steps -->
+    <div class="progress-steps">
+      <div class="step" id="step1" title="Register"></div>
+      <div class="step" id="step2" title="Login"></div>
+      <div class="step" id="step3" title="Profile"></div>
+      <div class="step" id="step4" title="Analysis"></div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+      <button class="tab active" id="registerTabBtn" onclick="switchTab('register')">👤 Register</button>
+      <button class="tab" id="loginTabBtn" onclick="switchTab('login')" disabled>🔑 Login</button>
+      <button class="tab" id="profileTabBtn" onclick="switchTab('profile')" disabled>📝 Profile</button>
+      <button class="tab" id="analysisTabBtn" onclick="switchTab('analysis')" disabled>🔬 Analysis</button>
+      <button class="tab" id="historyTabBtn" onclick="switchTab('history')" disabled>📊 History</button>
+      <button class="tab" id="dermTabBtn" onclick="switchTab('dermatologists')" disabled>🏥 Doctors</button>
+    </div>
+
+    <!-- REGISTER TAB -->
+    <div id="registerTab" class="tab-content">
+      <div class="card">
+        <h3 style="margin-top:0;margin-bottom:6px;">Welcome to E-Derma! 🌟</h3>
+        <div class="muted" style="margin-bottom:16px;">
+          Create your account to access AI-powered skin analysis and personalized recommendations.
+        </div>
+
+        <div class="login-grid">
+          <form id="registerForm">
+            <label>
+              Full Name *
+              <input type="text" id="reg_name" required placeholder="Enter your full name" maxlength="50">
+              <div id="regNameError" class="error-message" style="display:none;"></div>
+            </label>
+
+            <label>
+              Email Address *
+              <input type="email" id="reg_email" required placeholder="your.email@gmail.com (lowercase only)" maxlength="35">
+              <div class="muted" style="font-size:11px;margin-top:2px;">
+                Only lowercase letters, numbers, dots, and underscores allowed
+              </div>
+              <div id="regEmailError" class="error-message" style="display:none;"></div>
+            </label>
+
+            <label>
+              Contact Number *
+              <input type="tel" id="reg_contact" required placeholder="10-digit mobile number" maxlength="10">
+              <div id="regContactError" class="error-message" style="display:none;"></div>
+            </label>
+
+            <label>
+              Password *
+              <input type="password" id="reg_password" required placeholder="Min 8 chars: Uppercase, lowercase, number">
+              <div class="muted" style="font-size:11px;margin-top:2px;">
+                Must contain: Uppercase letter, lowercase letter, and number (minimum 8 characters)
+              </div>
+              <div id="regPasswordError" class="error-message" style="display:none;"></div>
+              <div id="passwordStrength" class="password-strength"></div>
+            </label>
+
+            <label>
+              Confirm Password *
+              <input type="password" id="reg_confirm_password" required placeholder="Confirm your password">
+              <div id="regConfirmPasswordError" class="error-message" style="display:none;"></div>
+            </label>
+
+            <div class="row" style="margin-top:16px;">
+              <button type="submit" class="primary" id="registerBtn">Create Account</button>
+              <button type="button" class="ghost" onclick="switchTab('login')">Already have account?</button>
+            </div>
+          </form>
+
+          <div class="login-side-visual">
+            <img
+              src="/static/login-skin.jpg"
+              alt="E-Derma skin analysis"
+              style="width:100%;max-width:260px;border-radius:12px;"
+            />
+            <div class="login-side-visual-caption">
+              Join thousands of users who trust E-Derma for personalized skin analysis and expert recommendations.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGIN TAB -->
+    <div id="loginTab" class="tab-content" style="display:none;">
+      <div class="card">
+        <h3 style="margin-top:0;margin-bottom:6px;">Welcome Back! 👋</h3>
+        <div class="muted" style="margin-bottom:16px;">
+          Login to access your personalized skin analysis dashboard.
+        </div>
+
+        <form id="loginForm">
+          <label>
+            Email Address *
+            <input type="email" id="login_email" required placeholder="your.email@gmail.com (lowercase only)">
+            <div id="loginEmailError" class="error-message" style="display:none;"></div>
+          </label>
+
+          <label>
+            Password *
+            <input type="password" id="login_password" required placeholder="Enter your password">
+            <div id="loginPasswordError" class="error-message" style="display:none;"></div>
+          </label>
+
+          <div class="row" style="margin-top:16px;">
+            <button type="submit" class="primary" id="loginBtn">Login to Dashboard</button>
+            <button type="button" class="ghost" onclick="switchTab('register')">Create new account</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- PROFILE TAB -->
+    <div id="profileTab" class="tab-content" style="display:none;">
+      <div class="card">
+        <h3 style="margin-top:0;margin-bottom:6px;">Complete Your Profile 📝</h3>
+        <div class="muted" style="margin-bottom:16px;">
+          Please provide additional information for personalized skin analysis.
+        </div>
+
+        <div class="login-grid">
+          <form id="profileForm">
+            <label>
+              Full Name *
+              <input type="text" id="profile_name" required placeholder="Your full name" readonly>
+            </label>
+
+            <label>
+              Contact Number *
+              <input type="tel" id="profile_contact" required placeholder="10-digit mobile number" maxlength="10">
+              <div id="profileContactError" class="error-message" style="display:none;"></div>
+            </label>
+
+            <label>
+              Complete Address *
+              <input type="text" id="profile_address" required placeholder="House/Flat No., Street, Area, Locality">
+              <div class="muted" style="font-size:11px;margin-top:2px;">
+                Include house/flat number, street name, and locality (e.g., 123 Main Street, Sector 5)
+              </div>
+              <div id="profileAddressError" class="error-message" style="display:none;"></div>
+              <div id="profileAddressSuccess" class="success-message" style="display:none;"></div>
+            </label>
+
+            <label>
+              City *
+              <input type="text" id="profile_city" required placeholder="Start typing your city name...">
+              <div class="muted" style="font-size:11px;margin-top:2px;">
+                Type to see city suggestions (e.g., Mumbai, Delhi, Bangalore)
+              </div>
+              <div id="profileCityError" class="error-message" style="display:none;"></div>
+            </label>
+
+            <label>
+              Skin Type (Self Assessment) *
+              <select id="profile_skin_type" required>
+                <option value="">Select your skin type</option>
+                <option value="Oily">Oily - Shiny, large pores, prone to acne</option>
+                <option value="Dry">Dry - Tight, flaky, rough texture</option>
+                <option value="Normal">Normal - Balanced, smooth, few imperfections</option>
+                <option value="Combination">Combination - Oily T-zone, dry cheeks</option>
+                <option value="Sensitive">Sensitive - Easily irritated, reactive</option>
+              </select>
+              <div id="profileSkinTypeError" class="error-message" style="display:none;"></div>
+            </label>
+
+            <div class="row" style="margin-top:16px;">
+              <button type="submit" class="primary" id="profileSaveBtn">Save & Continue to Analysis</button>
+              <button type="button" class="secondary" onclick="validateProfileAddress()">📍 Verify Address</button>
+            </div>
+          </form>
+
+          <div>
+            <div class="card" style="background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);">
+              <h4 style="margin-top:0;color:var(--accent);">Account Information</h4>
+              <div id="userAccountInfo">
+                <div class="muted">Complete login to view account details</div>
+              </div>
+            </div>
+
+            <div class="banner" style="margin-top:16px;">
+              <strong>🎯 Next Steps:</strong><br>
+              1. ✅ Account created successfully<br>
+              2. ✅ Login completed<br>
+              3. 📝 Complete profile information<br>
+              4. 🔬 Start AI skin analysis<br>
+              5. 💊 Get personalized recommendations
+            </div>
+
+            <div class="row" style="margin-top:12px;">
+              <button type="button" class="ghost" onclick="logout()">🚪 Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANALYSIS TAB -->
+    <div id="analysisTab" class="tab-content" style="display:none;">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div>
+            <h3 style="margin:0;">🔬 AI Skin Analysis</h3>
+            <div class="muted">Capture your face image for personalized analysis</div>
+          </div>
+          <div id="userWelcome" class="muted" style="text-align:right;font-size:12px;">
+            <!-- User info will be populated here -->
+          </div>
+        </div>
+
+        <div class="grid">
+          <!-- LEFT: Camera / Upload -->
+          <div class="card">
+            <h3 style="margin-top:0;margin-bottom:8px;">📸 Capture Face Image</h3>
+            <video id="video" autoplay playsinline></video>
+            <img id="preview" style="display:none;margin-top:10px;"/>
+
+            <div class="row">
+              <button class="primary" id="captureBtn" type="button">📸 Capture</button>
+              <button class="secondary" id="toggleUploadBtn" type="button">📁 Upload File</button>
+              <button class="ghost" id="retakeBtn" type="button" style="display:none;">↩ Retake</button>
+            </div>
+
+            <div id="uploadBox" style="display:none;margin-top:10px;">
+              <input type="file" id="file" accept="image/*">
+            </div>
+
+            <div class="row">
+              <button class="primary" id="analyzeBtn" type="button">🔍 Analyze with AI</button>
+            </div>
+
+            <div class="muted">Note: This is a supportive tool and does not replace professional dermatological consultation.</div>
+            <canvas id="canvas" style="display:none;"></canvas>
+          </div>
+
+          <!-- RIGHT: Results -->
+          <div class="card">
+            <h3 style="margin-top:0;margin-bottom:8px;">📊 Analysis Results</h3>
+            <div id="resultContent" class="muted">
+              After capturing and analyzing your image, personalized results and recommendations will appear here.
+            </div>
+          </div>
+        </div>
+
+        <div class="muted" style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+          <div>Analysis Mode: <span id="modeLabel">Ready</span></div>
+          <div class="chip">
+            <span style="width:8px;height:8px;border-radius:999px;background:#22c55e;"></span>
+            Real-time AI processing
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY TAB -->
+    <div id="historyTab" class="tab-content" style="display:none;">
+      <div class="card">
+        <h3 style="margin-top:0;margin-bottom:6px;">📊 Analysis History</h3>
+        <div class="muted" style="margin-bottom:16px;">
+          View your previous skin analysis results and track progress over time.
+        </div>
+
+        <form id="historyForm" style="margin-bottom:16px;">
+          <label>
+            Enter Contact Number
+            <input type="tel" id="history_contact" placeholder="10-digit mobile number" maxlength="10">
+          </label>
+          <div class="row">
+            <button type="submit" class="primary">📊 Load History</button>
+            <button type="button" class="danger" onclick="deleteUserData()">🗑️ Delete My Data</button>
+          </div>
+        </form>
+
+        <div id="historyResults">
+          <div class="muted">Enter your contact number to view analysis history.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DERMATOLOGISTS TAB -->
+    <div id="dermatologistsTab" class="tab-content" style="display:none;">
+      <div class="card">
+        <h3 style="margin-top:0;margin-bottom:6px;">🏥 Find Dermatologists</h3>
+        <div class="muted" style="margin-bottom:16px;">
+          Locate qualified dermatologists in your area with ratings and contact information.
+        </div>
+
+        <form id="dermForm" style="margin-bottom:16px;">
+          <label>
+            City *
+            <input type="text" id="derm_city" required placeholder="Start typing your city name...">
+            <div class="muted" style="font-size:11px;margin-top:2px;">
+              Type to see city suggestions for finding nearby dermatologists
+            </div>
+          </label>
+          <label>
+            Address (Optional)
+            <input type="text" id="derm_address" placeholder="Specific area or landmark for better results">
+          </label>
+          <div class="row">
+            <button type="submit" class="primary">🔍 Find Dermatologists</button>
+            <button type="button" class="secondary" onclick="openGoogleMaps()">🗺️ Open Google Maps</button>
+          </div>
+        </form>
+
+        <div id="dermResults">
+          <div class="muted">Enter your city to find nearby dermatologists.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+<script>
+// Global variables
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const preview = document.getElementById('preview');
+const fileInput = document.getElementById('file');
+const captureBtn = document.getElementById('captureBtn');
+const toggleUploadBtn = document.getElementById('toggleUploadBtn');
+const retakeBtn = document.getElementById('retakeBtn');
+const analyzeBtn = document.getElementById('analyzeBtn');
+const uploadBox = document.getElementById('uploadBox');
+const resultContent = document.getElementById('resultContent');
+const modeLabel = document.getElementById('modeLabel');
+
+let useUpload = false;
+let stream = null;
+let currentUser = null;
+let userProfile = null;
+
+// User flow state management
+const UserState = {
+  GUEST: 'guest',
+  REGISTERED: 'registered', 
+  LOGGED_IN: 'logged_in',
+  PROFILE_COMPLETE: 'profile_complete'
+};
+
+let currentState = UserState.GUEST;
+
+// Enhanced validation functions
+function validateName(name) {
+  if (!name || !name.trim()) {
+    return { valid: false, message: "Please enter your full name" };
+  }
+  
+  name = name.trim();
+  
+  if (name.length < 3) {
+    return { valid: false, message: "Please enter your complete name (minimum 3 characters)" };
+  }
+  
+  if (name.length > 50) {
+    return { valid: false, message: "Name is too long (maximum 50 characters)" };
+  }
+  
+  // Only alphabets, spaces, and dots for initials allowed
+  if (!/^[a-zA-Z\s.]+$/.test(name)) {
+    return { valid: false, message: "Name should only contain letters, spaces, and dots (for initials)" };
+  }
+  
+  // Check for realistic name patterns - must have vowels for longer names
+  const vowels = (name.match(/[aeiouAEIOU]/g) || []).length;
+  const consonants = (name.match(/[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]/g) || []).length;
+  
+  // For names longer than 4 characters, ensure reasonable vowel distribution (relaxed for Indian names)
+  if (name.length > 4 && vowels === 0) {
+    return { valid: false, message: "Please enter a real name (like 'John', 'Steve', 'Archana', 'Sahana')" };
+  }
+  
+  // Check for excessive consonant clusters (more than 3 consecutive consonants for Indian names)
+  if (/[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]{4,}/.test(name)) {
+    return { valid: false, message: "Please enter a real name with proper spelling" };
+  }
+  
+  // Check for repetitive patterns (4+ consecutive same letters)
+  if (/(.)\1{3,}/.test(name)) {
+    return { valid: false, message: "Please enter a real name, not repetitive letters" };
+  }
+  
+  // Block obvious random sequences
+  const randomPatterns = [
+    'qwerty', 'asdf', 'zxcv', 'qaz', 'wsx', 'edc', 'rfv',
+    'abcd', 'efgh', 'ijkl', 'mnop', 'qrst', 'uvwx',
+    'brsgyldl', 'xyzabc', 'lmnopq', 'fghijk', 'xyz', 'abc'
+  ];
+  
+  const lowerName = name.toLowerCase().replace(/\s/g, '');
+  for (const pattern of randomPatterns) {
+    if (lowerName.includes(pattern)) {
+      return { valid: false, message: "Please enter your real name (like 'John', 'Steve', 'Archana', 'Sahana')" };
+    }
+  }
+  
+  // Check for test/dummy names
+  const testNames = [
+    'test', 'sample', 'demo', 'user', 'admin', 'temp', 'example',
+    'dummy', 'fake', 'null', 'name', 'firstname', 'lastname', 'xyz', 'abc'
+  ];
+  
+  if (testNames.some(test => lowerName.includes(test))) {
+    return { valid: false, message: "Please enter your real name, not a test name (examples: John, Steve, Archana, Sahana)" };
+  }
+  
+  // Ensure at least one meaningful name part (not just initials)
+  const nameParts = name.split(/\s+/).filter(part => part.length > 0);
+  const meaningfulParts = nameParts.filter(part => {
+    // Allow single letters as initials, but require at least one longer name
+    return part.length >= 2;
+  });
+  
+  if (meaningfulParts.length === 0) {
+    return { valid: false, message: "Please include at least one complete name (2+ letters)" };
+  }
+  
+  // Check if name parts look realistic (allow both Western and Indian names)
+  const commonNameEndings = ['a', 'e', 'i', 'o', 'u', 'y', 'n', 's', 'r', 'l', 'h', 'd', 't', 'na', 'ni', 'ka', 'ya', 'ra', 'la', 'ma', 'ta', 'da', 'pa', 'va', 'sa', 'ha'];
+  const commonNameBeginnings = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'w', 'ar', 'an', 'ad', 'ak', 'am', 'as', 'av', 'pr', 'kr', 'sr', 'sh', 'ch', 'bh', 'dh', 'kh', 'ph', 'th', 'rh'];
+  
+  // Common Indian name patterns
+  const indianNamePatterns = [
+    /^[aeiou]/i, // Starts with vowel (Archana, Ananya, Uma, etc.)
+    /[aeiou]{2}/i, // Contains vowel combinations (Sai, Rao, etc.)
+    /na$/i, // Ends with 'na' (Archana, Sahana, Krishna, etc.)
+    /ni$/i, // Ends with 'ni' (Ragini, Rohini, etc.)
+    /ka$/i, // Ends with 'ka' (Deepika, Priyanka, etc.)
+    /ya$/i, // Ends with 'ya' (Divya, Kavya, etc.)
+    /ra$/i, // Ends with 'ra' (Indira, Shakira, etc.)
+    /sh/i,  // Contains 'sh' (Shiva, Rakesh, etc.)
+    /ch/i,  // Contains 'ch' (Sachin, Rachana, etc.)
+    /th/i,  // Contains 'th' (Pritha, Haritha, etc.)
+  ];
+  
+  let hasRealisticPattern = false;
+  for (const part of meaningfulParts) {
+    const lowerPart = part.toLowerCase();
+    const hasCommonEnding = commonNameEndings.some(ending => lowerPart.endsWith(ending));
+    const hasCommonBeginning = commonNameBeginnings.some(beginning => lowerPart.startsWith(beginning));
+    const hasIndianPattern = indianNamePatterns.some(pattern => pattern.test(part));
+    
+    if (hasCommonEnding || hasCommonBeginning || hasIndianPattern) {
+      hasRealisticPattern = true;
+      break;
+    }
+  }
+  
+  if (!hasRealisticPattern && name.length > 6) {
+    return { valid: false, message: "Please enter a real name (examples: John, Steve, Archana, Sahana)" };
+  }
+  
+  return { valid: true, message: "" };
+}
+
+function validateEmail(email) {
+  if (!email || !email.trim()) {
+    return { valid: false, message: "Please enter your email address" };
+  }
+  
+  email = email.trim();
+  
+  // Check if email contains uppercase letters
+  if (email !== email.toLowerCase()) {
+    return { valid: false, message: "Email address must be in lowercase only" };
+  }
+  
+  if (email.length < 12) {
+    return { valid: false, message: "Please enter a complete email address (minimum 12 characters)" };
+  }
+  
+  if (email.length > 35) {
+    return { valid: false, message: "Email address is too long (maximum 35 characters)" };
+  }
+  
+  // Strict Gmail validation only
+  if (!(email.endsWith('@gmail.com') || email.endsWith('@gmail.in'))) {
+    return { valid: false, message: "Please use only Gmail addresses (@gmail.com or @gmail.in)" };
+  }
+  
+  const username = email.split('@')[0];
+  
+  if (username.length < 4) {
+    return { valid: false, message: "Email username too short - please use your real email (like john2024)" };
+  }
+  
+  if (username.length > 25) {
+    return { valid: false, message: "Email username is too long" };
+  }
+  
+  // Character validation - only lowercase letters, numbers, dots, underscores
+  if (!/^[a-z0-9._]+$/.test(username)) {
+    return { valid: false, message: "Email can only contain lowercase letters, numbers, dots, and underscores" };
+  }
+  
+  // Must start and end with alphanumeric
+  if (!username[0].match(/[a-z0-9]/) || !username[username.length-1].match(/[a-z0-9]/)) {
+    return { valid: false, message: "Email must start and end with a letter or number" };
+  }
+  
+  // No consecutive dots or underscores
+  if (username.includes('..') || username.includes('__')) {
+    return { valid: false, message: "Email cannot have consecutive dots or underscores" };
+  }
+  
+  // Must contain at least 3 lowercase letters for authenticity
+  const letterCount = (username.match(/[a-z]/g) || []).length;
+  if (letterCount < 3) {
+    return { valid: false, message: "Email must contain at least 3 lowercase letters (like john123, steve2024)" };
+  }
+  
+  // Check for realistic patterns - should have some recognizable name-like structure
+  const hasRealisticPattern = /^[a-z]{3,}/.test(username); // Starts with at least 3 lowercase letters
+  if (!hasRealisticPattern) {
+    return { valid: false, message: "Please use a realistic email format (examples: john@gmail.com, steve2024@gmail.com)" };
+  }
+  
+  // Block obvious test patterns
+  const testPatterns = [
+    'test', 'sample', 'demo', 'user', 'admin', 'temp', 'example',
+    'dummy', 'fake', 'spam', 'trash', 'junk', 'asdf', 'qwerty',
+    '1234', 'abcd', 'aaaa', 'bbbb', 'xxxx', 'yyyy', 'zzzz'
+  ];
+  
+  for (const pattern of testPatterns) {
+    if (username.includes(pattern)) {
+      return { valid: false, message: "Please use your real email address, not a test email" };
+    }
+  }
+  
+  // Check for keyboard sequences
+  const keyboardSequences = [
+    'qwerty', 'asdf', 'zxcv', 'qaz', 'wsx', 'edc', 'rfv',
+    '123456', '654321', 'abcdef', 'fedcba'
+  ];
+  
+  for (const seq of keyboardSequences) {
+    if (username.includes(seq)) {
+      return { valid: false, message: "Please avoid keyboard sequences in your email" };
+    }
+  }
+  
+  // Ensure reasonable character distribution
+  const digitCount = (username.match(/\d/g) || []).length;
+  const specialCount = (username.match(/[._]/g) || []).length;
+  
+  // Cannot be all numbers (except letters)
+  if (digitCount > username.length * 0.7) {
+    return { valid: false, message: "Email should not be mostly numbers - use a name-based email" };
+  }
+  
+  // Too many special characters
+  if (specialCount > username.length * 0.3) {
+    return { valid: false, message: "Too many dots/underscores - keep it simple (like john.smith@gmail.com)" };
+  }
+  
+  return { valid: true, message: "" };
+}
+
+function validateContact(contact) {
+  if (!contact || !contact.trim()) {
+    return { valid: false, message: "Contact number is required" };
+  }
+  
+  contact = contact.trim();
+  
+  if (!/^\d{10}$/.test(contact)) {
+    return { valid: false, message: "Contact must be exactly 10 digits" };
+  }
+  
+  if (!['6', '7', '8', '9'].includes(contact[0])) {
+    return { valid: false, message: "Contact must start with 6, 7, 8, or 9" };
+  }
+  
+  return { valid: true, message: "" };
+}
+
+function validatePassword(password) {
+  if (!password) {
+    return { valid: false, message: "Password is required" };
+  }
+  
+  if (password.length < 8) {
+    return { valid: false, message: "Password must be at least 8 characters long" };
+  }
+  
+  if (password.length > 50) {
+    return { valid: false, message: "Password is too long (maximum 50 characters)" };
+  }
+  
+  // Check for at least one uppercase letter
+  if (!/[A-Z]/.test(password)) {
+    return { valid: false, message: "Password must contain at least one uppercase letter (A-Z)" };
+  }
+  
+  // Check for at least one lowercase letter
+  if (!/[a-z]/.test(password)) {
+    return { valid: false, message: "Password must contain at least one lowercase letter (a-z)" };
+  }
+  
+  // Check for at least one number
+  if (!/\d/.test(password)) {
+    return { valid: false, message: "Password must contain at least one number (0-9)" };
+  }
+  
+  // Check for common weak passwords
+  const weakPasswords = [
+    'password', 'Password', 'PASSWORD', '12345678', 'Abcd1234',
+    'qwerty123', 'Qwerty123', 'admin123', 'Admin123', 'user1234',
+    'User1234', 'test1234', 'Test1234', 'Abcdef123', 'Password123'
+  ];
+  
+  if (weakPasswords.includes(password)) {
+    return { valid: false, message: "Please choose a stronger password (avoid common passwords)" };
+  }
+  
+  return { valid: true, message: "" };
+}
+
+function validateCity(city) {
+  if (!city || !city.trim()) {
+    return { valid: false, message: "Please enter your city name" };
+  }
+  
+  city = city.trim();
+  
+  if (city.length < 2) {
+    return { valid: false, message: "City name must be at least 2 characters" };
+  }
+  
+  if (city.length > 50) {
+    return { valid: false, message: "City name is too long (maximum 50 characters)" };
+  }
+  
+  if (!/^[a-zA-Z\s\-.]+$/.test(city)) {
+    return { valid: false, message: "City should contain only letters, spaces, hyphens, and periods" };
+  }
+  
+  // Check for realistic city patterns - must have vowels for longer names
+  const vowels = (city.match(/[aeiouAEIOU]/g) || []).length;
+  if (city.length > 4 && vowels === 0) {
+    return { valid: false, message: "Please enter a real city name (like 'Mumbai', 'Delhi', 'Chennai')" };
+  }
+  
+  // Check for excessive consonant clusters
+  if (/[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]{4,}/.test(city)) {
+    return { valid: false, message: "Please enter a real city name with proper spelling" };
+  }
+  
+  // Check for repetitive patterns (4+ consecutive same letters)
+  if (/(.)\1{3,}/.test(city)) {
+    return { valid: false, message: "Please enter a real city name, not repetitive letters" };
+  }
+  
+  // Block test/fake cities
+  const invalidCities = [
+    'test', 'sample', 'demo', 'city', 'town', 'place', 'location',
+    'dummy', 'fake', 'temp', 'example', 'xyz', 'abc', 'asdf',
+    'qwerty', 'zxcv', 'hjkl', 'mnbv'
+  ];
+  
+  const cityLower = city.toLowerCase().replace(/\s/g, '');
+  for (const invalid of invalidCities) {
+    if (cityLower.includes(invalid)) {
+      return { valid: false, message: "Please enter a real city name, not a test name" };
+    }
+  }
+  
+  // Check for keyboard sequences
+  const keyboardSequences = ['qwerty', 'asdf', 'zxcv', 'qaz', 'wsx', 'edc'];
+  for (const seq of keyboardSequences) {
+    if (cityLower.includes(seq)) {
+      return { valid: false, message: "Please enter a real city name, not keyboard sequences" };
+    }
+  }
+  
+  return { valid: true, message: "" };
+}
+
+function validateAddress(address) {
+  if (!address || !address.trim()) {
+    return { valid: false, message: "Please enter your complete address" };
+  }
+  
+  address = address.trim();
+  
+  if (address.length < 10) {
+    return { valid: false, message: "Please enter a complete address (minimum 10 characters)" };
+  }
+  
+  if (address.length > 200) {
+    return { valid: false, message: "Address is too long (maximum 200 characters)" };
+  }
+  
+  if (!/^[a-zA-Z0-9\s,.\-/#()]+$/.test(address)) {
+    return { valid: false, message: "Address contains invalid characters" };
+  }
+  
+  // Must contain at least one number
+  if (!/\d/.test(address)) {
+    return { valid: false, message: "Address must contain at least one number (house/flat number)" };
+  }
+  
+  // Block test/fake addresses
+  const fakePatterns = [
+    'test', 'sample', 'demo', 'fake', 'dummy', 'temp', 'example',
+    'asdf', 'qwerty', 'zxcv', 'hjkl', 'mnbv', 'abcd', 'xyz'
+  ];
+  
+  const addressLower = address.toLowerCase();
+  for (const pattern of fakePatterns) {
+    if (addressLower.includes(pattern)) {
+      return { valid: false, message: "Please enter your real address, not a test address" };
+    }
+  }
+  
+  // Check for repetitive patterns (5+ consecutive same characters)
+  if (/(.)\1{4,}/.test(address)) {
+    return { valid: false, message: "Please enter a real address, not repetitive characters" };
+  }
+  
+  // Ensure address has structure
+  const addressWords = address.split(/[,\s]+/).filter(word => word.trim());
+  if (addressWords.length < 3) {
+    return { valid: false, message: "Please enter a complete address with street, area, and locality" };
+  }
+  
+  return { valid: true, message: "" };
+}
+
+// Autocomplete data for Indian cities
+const indianCities = [
+  'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Ahmedabad', 'Chennai', 'Kolkata', 'Surat', 'Pune', 'Jaipur',
+  'Lucknow', 'Kanpur', 'Nagpur', 'Indore', 'Thane', 'Bhopal', 'Visakhapatnam', 'Pimpri-Chinchwad', 'Patna', 'Vadodara',
+  'Ghaziabad', 'Ludhiana', 'Agra', 'Nashik', 'Faridabad', 'Meerut', 'Rajkot', 'Kalyan-Dombivali', 'Vasai-Virar', 'Varanasi',
+  'Srinagar', 'Aurangabad', 'Dhanbad', 'Amritsar', 'Navi Mumbai', 'Allahabad', 'Ranchi', 'Howrah', 'Coimbatore', 'Jabalpur',
+  'Gwalior', 'Vijayawada', 'Jodhpur', 'Madurai', 'Raipur', 'Kota', 'Chandigarh', 'Guwahati', 'Solapur', 'Hubli-Dharwad',
+  'Bareilly', 'Moradabad', 'Mysore', 'Gurgaon', 'Aligarh', 'Jalandhar', 'Tiruchirappalli', 'Bhubaneswar', 'Salem', 'Warangal',
+  'Guntur', 'Bhiwandi', 'Saharanpur', 'Gorakhpur', 'Bikaner', 'Amravati', 'Noida', 'Jamshedpur', 'Bhilai', 'Cuttack',
+  'Firozabad', 'Kochi', 'Nellore', 'Bhavnagar', 'Dehradun', 'Durgapur', 'Asansol', 'Rourkela', 'Nanded', 'Kolhapur',
+  'Ajmer', 'Akola', 'Gulbarga', 'Jamnagar', 'Ujjain', 'Loni', 'Siliguri', 'Jhansi', 'Ulhasnagar', 'Jammu', 'Sangli-Miraj',
+  'Mangalore', 'Erode', 'Belgaum', 'Ambattur', 'Tirunelveli', 'Malegaon', 'Gaya', 'Jalgaon', 'Udaipur', 'Maheshtala'
+];
+
+// Common address keywords for suggestions
+const addressKeywords = [
+  'Street', 'Road', 'Lane', 'Avenue', 'Block', 'Sector', 'Phase', 'Colony', 'Nagar', 'Park',
+  'Society', 'Apartment', 'Flat', 'House', 'Building', 'Tower', 'Complex', 'Residency', 'Villa',
+  'Plot', 'Cross', 'Main Road', 'Extension', 'Layout', 'Enclave', 'Gardens', 'Heights', 'Plaza'
+];
+
+// Autocomplete functionality
+function setupAutocomplete(inputId, suggestions, maxSuggestions = 5) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  
+  // Create suggestions container
+  const suggestionsContainer = document.createElement('div');
+  suggestionsContainer.className = 'autocomplete-suggestions';
+  suggestionsContainer.style.cssText = `
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(15,23,42,0.95);
+    border: 1px solid rgba(148,163,184,0.4);
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    backdrop-filter: blur(10px);
+  `;
+  
+  // Make input container relative
+  input.parentElement.style.position = 'relative';
+  input.parentElement.appendChild(suggestionsContainer);
+  
+  let currentFocus = -1;
+  
+  input.addEventListener('input', function() {
+    const value = this.value.toLowerCase().trim();
+    suggestionsContainer.innerHTML = '';
+    currentFocus = -1;
+    
+    if (value.length < 2) {
+      suggestionsContainer.style.display = 'none';
+      return;
+    }
+    
+    const matches = suggestions.filter(item => 
+      item.toLowerCase().includes(value)
+    ).slice(0, maxSuggestions);
+    
+    if (matches.length === 0) {
+      suggestionsContainer.style.display = 'none';
+      return;
+    }
+    
+    matches.forEach((match, index) => {
+      const suggestionItem = document.createElement('div');
+      suggestionItem.className = 'autocomplete-item';
+      suggestionItem.style.cssText = `
+        padding: 8px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(148,163,184,0.2);
+        font-size: 14px;
+        color: var(--text);
+      `;
+      
+      // Highlight matching text
+      const regex = new RegExp(`(${value})`, 'gi');
+      const highlightedText = match.replace(regex, '<strong style="color: var(--accent);">$1</strong>');
+      suggestionItem.innerHTML = highlightedText;
+      
+      suggestionItem.addEventListener('click', function() {
+        input.value = match;
+        suggestionsContainer.style.display = 'none';
+        input.focus();
+      });
+      
+      suggestionItem.addEventListener('mouseenter', function() {
+        // Remove active class from all items
+        document.querySelectorAll('.autocomplete-item').forEach(item => {
+          item.style.background = 'transparent';
+        });
+        this.style.background = 'rgba(34,197,94,0.1)';
+        currentFocus = index;
+      });
+      
+      suggestionsContainer.appendChild(suggestionItem);
+    });
+    
+    suggestionsContainer.style.display = 'block';
+  });
+  
+  // Handle keyboard navigation
+  input.addEventListener('keydown', function(e) {
+    const items = suggestionsContainer.querySelectorAll('.autocomplete-item');
+    
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      currentFocus++;
+      if (currentFocus >= items.length) currentFocus = 0;
+      setActive(items);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      currentFocus--;
+      if (currentFocus < 0) currentFocus = items.length - 1;
+      setActive(items);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (currentFocus > -1 && items[currentFocus]) {
+        items[currentFocus].click();
+      }
+    } else if (e.key === 'Escape') {
+      suggestionsContainer.style.display = 'none';
+      currentFocus = -1;
+    }
+  });
+  
+  function setActive(items) {
+    items.forEach((item, index) => {
+      if (index === currentFocus) {
+        item.style.background = 'rgba(34,197,94,0.1)';
+      } else {
+        item.style.background = 'transparent';
+      }
+    });
+  }
+  
+  // Hide suggestions when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!input.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+      suggestionsContainer.style.display = 'none';
+    }
+  });
+}
+// Helper function to safely extract error messages
+function getErrorMessage(error, defaultMessage = 'An error occurred') {
+  if (typeof error === 'string') {
+    return error;
+  } else if (typeof error === 'object' && error !== null) {
+    if (error.message) {
+      return error.message;
+    } else if (error.detail) {
+      if (typeof error.detail === 'string') {
+        return error.detail;
+      } else if (typeof error.detail === 'object') {
+        return JSON.stringify(error.detail);
+      }
+    } else {
+      return JSON.stringify(error);
+    }
+  }
+  return defaultMessage;
+}
+
+function showError(elementId, message) {
+  const errorEl = document.getElementById(elementId);
+  const inputEl = document.getElementById(elementId.replace('Error', ''));
+  
+  if (errorEl) {
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+  }
+  if (inputEl) {
+    inputEl.classList.add('input-error');
+  }
+}
+
+function hideError(elementId) {
+  const errorEl = document.getElementById(elementId);
+  const inputEl = document.getElementById(elementId.replace('Error', ''));
+  
+  if (errorEl) {
+    errorEl.style.display = 'none';
+  }
+  if (inputEl) {
+    inputEl.classList.remove('input-error');
+  }
+}
+
+function showSuccess(elementId, message) {
+  const successEl = document.getElementById(elementId);
+  if (successEl) {
+    successEl.textContent = message;
+    successEl.style.display = 'block';
+  }
+}
+
+function hideSuccess(elementId) {
+  const successEl = document.getElementById(elementId);
+  if (successEl) {
+    successEl.style.display = 'none';
+  }
+}
+
+// Tab Management with user flow enforcement
+function switchTab(tabName) {
+  if (!canAccessTab(tabName)) {
+    showAccessDeniedMessage(tabName);
+    return;
+  }
+
+  const tabContents = document.querySelectorAll('.tab-content');
+  tabContents.forEach(tab => tab.style.display = 'none');
+  
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(tab => tab.classList.remove('active'));
+  
+  const targetTab = document.getElementById(tabName + 'Tab');
+  if (targetTab) {
+    targetTab.style.display = 'block';
+  }
+  
+  if (event && event.target) {
+    event.target.classList.add('active');
+  }
+}
+
+function canAccessTab(tabName) {
+  switch (tabName) {
+    case 'register':
+      return true;
+    case 'login':
+      return currentState === UserState.GUEST || currentState === UserState.REGISTERED;
+    case 'profile':
+      return currentState === UserState.LOGGED_IN || currentState === UserState.PROFILE_COMPLETE;
+    case 'analysis':
+      return currentState === UserState.PROFILE_COMPLETE;
+    case 'history':
+    case 'dermatologists':
+      return currentState === UserState.PROFILE_COMPLETE;
+    default:
+      return false;
+  }
+}
+
+function showAccessDeniedMessage(tabName) {
+  let message = '';
+  switch (tabName) {
+    case 'profile':
+      message = 'Please login first to access your profile.';
+      break;
+    case 'analysis':
+      message = 'Please complete your profile first to start skin analysis.';
+      break;
+    case 'history':
+    case 'dermatologists':
+      message = 'Please complete registration and profile setup to access this feature.';
+      break;
+    default:
+      message = 'Access denied. Please follow the registration process.';
+  }
+  
+  alert(message);
+}
+
+function updateUIForState(state) {
+  currentState = state;
+  
+  const steps = ['step1', 'step2', 'step3', 'step4'];
+  const tabs = ['registerTabBtn', 'loginTabBtn', 'profileTabBtn', 'analysisTabBtn', 'historyTabBtn', 'dermTabBtn'];
+  
+  // Update progress steps
+  steps.forEach((stepId, index) => {
+    const step = document.getElementById(stepId);
+    if (step) {
+      step.classList.remove('active', 'completed');
+      if (index < Object.values(UserState).indexOf(state)) {
+        step.classList.add('completed');
+      } else if (index === Object.values(UserState).indexOf(state)) {
+        step.classList.add('active');
+      }
+    }
+  });
+  
+  // Update tab accessibility
+  tabs.forEach((tabId, index) => {
+    const tab = document.getElementById(tabId);
+    if (tab) {
+      switch (state) {
+        case UserState.GUEST:
+          tab.disabled = index > 1; // Only register and login
+          break;
+        case UserState.REGISTERED:
+          tab.disabled = index > 1; // Only register and login
+          break;
+        case UserState.LOGGED_IN:
+          tab.disabled = index > 2; // Up to profile
+          break;
+        case UserState.PROFILE_COMPLETE:
+          tab.disabled = false; // All tabs accessible
+          break;
+      }
+    }
+  });
+}
+
+// Input restrictions
+document.addEventListener("DOMContentLoaded", () => {
+  // Name inputs - only letters, spaces, and dots
+  const nameInputs = ['reg_name', 'profile_name'];
+  nameInputs.forEach(id => {
+    const input = document.getElementById(id);
+    if (input) {
+      input.addEventListener("input", () => {
+        input.value = input.value.replace(/[^A-Za-z\s.]/g, "");
+      });
+    }
+  });
+  
+  // City inputs - only letters, spaces, hyphens, periods
+  const cityInputs = ['profile_city', 'derm_city'];
+  cityInputs.forEach(id => {
+    const input = document.getElementById(id);
+    if (input) {
+      input.addEventListener("input", () => {
+        // Allow only letters, spaces, hyphens, and periods
+        input.value = input.value.replace(/[^A-Za-z\s\-.]/g, "");
+      });
+    }
+  });
+  
+  // Address inputs - allow letters, numbers, spaces, and common address characters
+  const addressInputs = ['profile_address', 'derm_address'];
+  addressInputs.forEach(id => {
+    const input = document.getElementById(id);
+    if (input) {
+      input.addEventListener("input", () => {
+        // Allow letters, numbers, spaces, commas, periods, hyphens, slashes, hash, parentheses
+        input.value = input.value.replace(/[^A-Za-z0-9\s,.\-/#()]/g, "");
+      });
+    }
+  });
+  const contactInputs = ['reg_contact', 'profile_contact', 'history_contact'];
+  contactInputs.forEach(id => {
+    const input = document.getElementById(id);
+    if (input) {
+      input.addEventListener("input", () => {
+        input.value = input.value.replace(/\D/g, "").slice(0, 10);
+      });
+    }
+  });
+  
+  // Password strength indicator
+  const passwordInput = document.getElementById('reg_password');
+  if (passwordInput) {
+    passwordInput.addEventListener('input', () => {
+      const password = passwordInput.value;
+      const strengthEl = document.getElementById('passwordStrength');
+      
+      if (password.length === 0) {
+        strengthEl.textContent = '';
+        return;
+      }
+      
+      let strength = 0;
+      let feedback = [];
+      
+      // Length check
+      if (password.length >= 8) {
+        strength++;
+      } else {
+        feedback.push('8+ characters');
+      }
+      
+      // Uppercase check
+      if (/[A-Z]/.test(password)) {
+        strength++;
+      } else {
+        feedback.push('uppercase letter');
+      }
+      
+      // Lowercase check
+      if (/[a-z]/.test(password)) {
+        strength++;
+      } else {
+        feedback.push('lowercase letter');
+      }
+      
+      // Number check
+      if (/\d/.test(password)) {
+        strength++;
+      } else {
+        feedback.push('number');
+      }
+      
+      // Special character bonus
+      if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        strength++;
+      }
+      
+      // Display strength and feedback
+      if (strength <= 2) {
+        strengthEl.innerHTML = `⚠️ Weak password<br><span style="font-size:10px;">Missing: ${feedback.join(', ')}</span>`;
+        strengthEl.className = 'password-strength strength-weak';
+      } else if (strength <= 3) {
+        strengthEl.innerHTML = `🔶 Medium strength<br><span style="font-size:10px;">Missing: ${feedback.join(', ')}</span>`;
+        strengthEl.className = 'password-strength strength-medium';
+      } else if (strength === 4) {
+        strengthEl.textContent = '✅ Strong password';
+        strengthEl.className = 'password-strength strength-strong';
+      } else {
+        strengthEl.textContent = '🔒 Very strong password';
+        strengthEl.className = 'password-strength strength-strong';
+      }
+    });
+  }
+  
+  // Email inputs - only lowercase letters, numbers, dots, underscores
+  const emailInputs = ['reg_email', 'login_email'];
+  emailInputs.forEach(id => {
+    const input = document.getElementById(id);
+    if (input) {
+      input.addEventListener("input", () => {
+        // Convert to lowercase and allow only valid email characters
+        let value = input.value.toLowerCase();
+        // Allow only lowercase letters, numbers, dots, underscores, and @ symbol
+        value = value.replace(/[^a-z0-9._@]/g, "");
+        input.value = value;
+      });
+    }
+  });
+  
+  // Initialize autocomplete for city and address fields
+  setupAutocomplete('profile_city', indianCities, 8);
+  setupAutocomplete('derm_city', indianCities, 8);
+  
+  // For address, we'll use a simpler approach with common address patterns
+  const addressInput = document.getElementById('profile_address');
+  if (addressInput) {
+    addressInput.addEventListener('input', function() {
+      // Auto-suggest address format as user types
+      const value = this.value;
+      if (value.length > 0 && !/\d/.test(value)) {
+        // If no numbers yet, suggest they start with house/flat number
+        if (!this.getAttribute('data-number-hint-shown')) {
+          this.setAttribute('placeholder', 'e.g., 123 Main Street, Sector 5, Locality Name');
+          this.setAttribute('data-number-hint-shown', 'true');
+        }
+      }
+    });
+  }
+  
+  // Initialize UI state
+  updateUIForState(UserState.GUEST);
+  updateUIForState(UserState.GUEST);
+});
+
+// Registration form
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const name = document.getElementById('reg_name').value.trim();
+  const email = document.getElementById('reg_email').value.trim();
+  const contact = document.getElementById('reg_contact').value.trim();
+  const password = document.getElementById('reg_password').value;
+  const confirmPassword = document.getElementById('reg_confirm_password').value;
+  
+  // Clear previous errors
+  ['regNameError', 'regEmailError', 'regContactError', 'regPasswordError', 'regConfirmPasswordError'].forEach(hideError);
+  
+  let hasErrors = false;
+  
+  // Validate all fields
+  const nameValidation = validateName(name);
+  if (!nameValidation.valid) {
+    showError('regNameError', nameValidation.message);
+    hasErrors = true;
+  }
+  
+  const emailValidation = validateEmail(email);
+  if (!emailValidation.valid) {
+    showError('regEmailError', emailValidation.message);
+    hasErrors = true;
+  }
+  
+  const contactValidation = validateContact(contact);
+  if (!contactValidation.valid) {
+    showError('regContactError', contactValidation.message);
+    hasErrors = true;
+  }
+  
+  const passwordValidation = validatePassword(password);
+  if (!passwordValidation.valid) {
+    showError('regPasswordError', passwordValidation.message);
+    hasErrors = true;
+  }
+  
+  if (password !== confirmPassword) {
+    showError('regConfirmPasswordError', 'Passwords do not match');
+    hasErrors = true;
+  }
+  
+  if (hasErrors) return;
+  
+  // Submit registration
+  const registerBtn = document.getElementById('registerBtn');
+  registerBtn.disabled = true;
+  registerBtn.innerHTML = '<div class="spinner"></div> Creating Account...';
+  
+  try {
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('email', email);
+    formData.append('contact', contact);
+    formData.append('password', password);
+    
+    const response = await fetch('/register', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      updateUIForState(UserState.REGISTERED);
+      alert('🎉 Registration successful! Please login to continue.');
+      
+      // Pre-fill login form
+      document.getElementById('login_email').value = email;
+      
+      // Switch to login tab
+      switchTab('login');
+      document.getElementById('registerForm').reset();
+    } else {
+      if (data.errors) {
+        data.errors.forEach(error => {
+          if (error.includes('Name:')) showError('regNameError', error.replace('Name: ', ''));
+          else if (error.includes('Email:')) showError('regEmailError', error.replace('Email: ', ''));
+          else if (error.includes('Contact:')) showError('regContactError', error.replace('Contact: ', ''));
+          else if (error.includes('Password:')) showError('regPasswordError', error.replace('Password: ', ''));
+        });
+      } else {
+        // Handle error response properly
+        let errorMessage = 'Registration failed';
+        if (data.detail) {
+          if (typeof data.detail === 'string') {
+            errorMessage = data.detail;
+          } else if (typeof data.detail === 'object') {
+            errorMessage = JSON.stringify(data.detail);
+          }
+        }
+        alert(errorMessage);
+      }
+    }
+  } catch (error) {
+    console.error('Registration error:', error);
+    alert(getErrorMessage(error, 'Registration failed. Please try again.'));
+  } finally {
+    registerBtn.disabled = false;
+    registerBtn.innerHTML = 'Create Account';
+  }
+});
+
+// Login form
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const email = document.getElementById('login_email').value.trim();
+  const password = document.getElementById('login_password').value;
+  
+  // Clear previous errors
+  ['loginEmailError', 'loginPasswordError'].forEach(hideError);
+  
+  let hasErrors = false;
+  
+  if (!email) {
+    showError('loginEmailError', 'Email is required');
+    hasErrors = true;
+  }
+  
+  if (!password) {
+    showError('loginPasswordError', 'Password is required');
+    hasErrors = true;
+  }
+  
+  if (hasErrors) return;
+  
+  const loginBtn = document.getElementById('loginBtn');
+  loginBtn.disabled = true;
+  loginBtn.innerHTML = '<div class="spinner"></div> Logging in...';
+  
+  try {
+    const formData = new FormData();
+    formData.append('email', email);
+    formData.append('password', password);
+    
+    const response = await fetch('/login', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      currentUser = data.user;
+      updateUIForState(UserState.LOGGED_IN);
+      
+      // Update account info in profile
+      updateAccountInfo(data.user);
+      
+      alert(`Welcome back, ${data.user.name}! Please complete your profile to start analysis.`);
+      
+      // Switch to profile tab
+      switchTab('profile');
+    } else {
+      // Handle login error properly
+      let errorMessage = 'Login failed';
+      if (data.detail) {
+        if (typeof data.detail === 'string') {
+          errorMessage = data.detail;
+        } else if (typeof data.detail === 'object') {
+          errorMessage = JSON.stringify(data.detail);
+        }
+      }
+      showError('loginPasswordError', errorMessage);
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    alert(getErrorMessage(error, 'Login failed. Please try again.'));
+  } finally {
+    loginBtn.disabled = false;
+    loginBtn.innerHTML = 'Login to Dashboard';
+  }
+});
+
+// Profile form
+document.getElementById('profileForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const name = document.getElementById('profile_name').value.trim();
+  const contact = document.getElementById('profile_contact').value.trim();
+  const address = document.getElementById('profile_address').value.trim();
+  const city = document.getElementById('profile_city').value.trim();
+  const skinType = document.getElementById('profile_skin_type').value.trim();
+  
+  // Clear previous errors
+  ['profileContactError', 'profileAddressError', 'profileCityError', 'profileSkinTypeError'].forEach(hideError);
+  
+  let hasErrors = false;
+  
+  const contactValidation = validateContact(contact);
+  if (!contactValidation.valid) {
+    showError('profileContactError', contactValidation.message);
+    hasErrors = true;
+  }
+  
+  const addressValidation = validateAddress(address);
+  if (!addressValidation.valid) {
+    showError('profileAddressError', addressValidation.message);
+    hasErrors = true;
+  }
+  
+  const cityValidation = validateCity(city);
+  if (!cityValidation.valid) {
+    showError('profileCityError', cityValidation.message);
+    hasErrors = true;
+  }
+  
+  if (!skinType) {
+    showError('profileSkinTypeError', 'Please select your skin type');
+    hasErrors = true;
+  }
+  
+  if (hasErrors) return;
+  
+  // Save profile data
+  userProfile = { name, contact, address, city, skin_type: skinType };
+  updateUIForState(UserState.PROFILE_COMPLETE);
+  
+  // Update welcome message
+  updateWelcomeMessage();
+  
+  alert('✅ Profile completed successfully! You can now start your skin analysis.');
+  
+  // Switch to analysis tab
+  switchTab('analysis');
+  
+  // Start camera for analysis
+  startCamera();
+});
+
+// Update account info display
+function updateAccountInfo(user) {
+  const accountInfo = document.getElementById('userAccountInfo');
+  accountInfo.innerHTML = `
+    <div><strong>Name:</strong> ${user.name}</div>
+    <div><strong>Email:</strong> ${user.email}</div>
+    <div><strong>Contact:</strong> ${user.contact}</div>
+    <div class="muted" style="margin-top:8px;">Account created successfully</div>
+  `;
+  
+  // Pre-fill profile form with user data
+  document.getElementById('profile_name').value = user.name;
+  document.getElementById('profile_contact').value = user.contact;
+}
+
+// Update welcome message in analysis tab
+function updateWelcomeMessage() {
+  const welcomeEl = document.getElementById('userWelcome');
+  if (currentUser && userProfile) {
+    welcomeEl.innerHTML = `
+      Welcome, ${currentUser.name}<br>
+      <span class="muted">${userProfile.city} • ${userProfile.skin_type} skin</span>
+    `;
+  }
+}
+
+// Address validation for profile
+async function validateProfileAddress() {
+  const address = document.getElementById('profile_address').value.trim();
+  const city = document.getElementById('profile_city').value.trim();
+  
+  if (!address || !city) {
+    alert('Please enter both address and city before validation.');
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/validate-address?address=${encodeURIComponent(address)}&city=${encodeURIComponent(city)}`);
+    const data = await response.json();
+    
+    if (data.valid) {
+      showSuccess('profileAddressSuccess', '✅ Address verified successfully');
+      hideError('profileAddressError');
+    } else {
+      showError('profileAddressError', data.message);
+      hideSuccess('profileAddressSuccess');
+    }
+  } catch (error) {
+    console.error('Address validation error:', error);
+    showError('profileAddressError', 'Unable to verify address at the moment');
+  }
+}
+
+function logout() {
+  currentUser = null;
+  userProfile = null;
+  updateUIForState(UserState.GUEST);
+  
+  // Clear all forms
+  document.getElementById('loginForm').reset();
+  document.getElementById('profileForm').reset();
+  
+  // Switch to register tab
+  switchTab('register');
+  
+  alert('You have been logged out successfully.');
+}
+
+function showAbout() {
+  alert(`E-Derma - AI Skin Analysis Platform
+
+Features:
+• Real-time facial skin analysis using AI
+• Personalized skincare recommendations
+• Product suggestions from major platforms
+• Dermatologist finder with Google Maps
+• Analysis history tracking
+• Address validation
+
+⚠️ Important: This is an academic prototype for educational purposes only. It is not a medical device and should not replace professional dermatological consultation.`);
+}
+
+// Camera and analysis functionality
+async function startCamera() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+    video.srcObject = stream;
+    video.style.display = "block";
+  } catch (e) {
+    console.warn("Camera error:", e);
+    video.style.display = "none";
+    uploadBox.style.display = "block";
+    useUpload = true;
+  }
+}
+
+function captureFrame() {
+  if (useUpload) {
+    if (!fileInput.files || !fileInput.files[0]) {
+      alert("Please choose an image file first.");
+      return null;
+    }
+    return fileInput.files[0];
+  }
+  const w = video.videoWidth || 640;
+  const h = video.videoHeight || 480;
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0, w, h);
+  const dataURL = canvas.toDataURL("image/png");
+  preview.src = dataURL;
+  preview.style.display = "block";
+  video.style.display = "none";
+  retakeBtn.style.display = "inline-block";
+
+  const base64 = dataURL.split(",")[1];
+  const bstr = atob(base64);
+  const u8 = new Uint8Array(bstr.length);
+  for (let i = 0; i < bstr.length; i++) u8[i] = bstr.charCodeAt(i);
+  return new Blob([u8], { type: "image/png" });
+}
+
+// UI Buttons
+captureBtn.onclick = () => { captureFrame(); };
+
+toggleUploadBtn.onclick = () => {
+  useUpload = !useUpload;
+
+  preview.style.display = "none";
+  retakeBtn.style.display = "none";
+
+  if (useUpload) {
+    uploadBox.style.display = "block";
+    video.style.display = "none";
+    toggleUploadBtn.textContent = "🎥 Use Camera";
+  } else {
+    uploadBox.style.display = "none";
+    video.style.display = "block";
+    toggleUploadBtn.textContent = "📁 Upload File";
+    if (!stream) startCamera();
+  }
+};
+
+fileInput.onchange = () => {
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    preview.src = e.target.result;
+    preview.style.display = "block";
+    video.style.display = "none";
+    retakeBtn.style.display = "inline-block";
+  };
+  reader.readAsDataURL(file);
+};
+
+retakeBtn.onclick = () => {
+  preview.style.display = "none";
+  retakeBtn.style.display = "none";
+  if (!useUpload) {
+    video.style.display = "block";
+  }
+};
+
+// Analysis function
+async function analyze() {
+  if (!userProfile) {
+    alert('Please complete your profile first.');
+    switchTab('profile');
+    return;
+  }
+
+  const blob = captureFrame();
+  if (!blob) return;
+
+  const fd = new FormData();
+  fd.append("file", blob, "face.png");
+  fd.append("name", userProfile.name);
+  fd.append("contact", userProfile.contact);
+  fd.append("address", userProfile.address);
+  fd.append("city", userProfile.city);
+  fd.append("user_skin_type", userProfile.skin_type);
+
+  analyzeBtn.disabled = true;
+  analyzeBtn.innerHTML = '<div class="spinner"></div> Analyzing…';
+
+  try {
+    const res = await fetch("/analyze", { method: "POST", body: fd });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => null);
+      let errorMessage = "Analysis failed";
+      
+      if (errorData && errorData.errors) {
+        errorMessage = "Analysis failed:\n" + errorData.errors.join("\n");
+      } else if (errorData && errorData.detail) {
+        if (typeof errorData.detail === 'string') {
+          errorMessage = "Analysis failed: " + errorData.detail;
+        } else if (typeof errorData.detail === 'object') {
+          if (errorData.detail.errors && Array.isArray(errorData.detail.errors)) {
+            errorMessage = "Validation failed:\n" + errorData.detail.errors.join("\n");
+          } else {
+            errorMessage = "Analysis failed: " + JSON.stringify(errorData.detail);
+          }
+        }
+      } else {
+        const txt = await res.text().catch(() => "Unknown error");
+        errorMessage = "Analysis failed: " + txt;
+      }
+      
+      alert(errorMessage);
+      return;
+    }
+    const data = await res.json();
+    renderResult(data);
+  } catch (e) {
+    console.error("Analysis error:", e);
+    alert(getErrorMessage(e, "Analysis failed: Unknown error occurred"));
+  } finally {
+    analyzeBtn.disabled = false;
+    analyzeBtn.textContent = "🔍 Analyze with AI";
+  }
+}
+analyzeBtn.onclick = analyze;
+
+// Render results
+function renderResult(d) {
+  modeLabel.textContent = d.explain?.mode || "unknown";
+
+  const skin = d.skin_type || "Unknown";
+  const sev = d.severity_score ?? "N/A";
+  let sevLabel = "Unknown";
+  if (typeof sev === "number") {
+    if (sev < 0.3) sevLabel = "Mild";
+    else if (sev < 0.7) sevLabel = "Moderate";
+    else sevLabel = "High";
+  }
+
+  const issues = (d.detected_issues || []).join(", ") || "None";
+  const conf = d.issue_confidence || {};
+  const confHtml = Object.keys(conf).map(k => `
+    <div style="margin-top:4px;font-size:13px;">
+      <b>${k}</b> – ${Math.round(conf[k] * 100)}%
+      <div class="bar"><div style="width:${conf[k] * 100}%;"></div></div>
+    </div>
+  `).join("");
+
+  const ings = (d.recommendations?.ingredients || []).map(i => `
+    <span class="tag">${i}</span>
+  `).join("");
+
+  // Store products data for filtering
+  allProducts = d.recommendations?.products || [];
+  
+  const products = allProducts.map(p => {
+    const categoryColor = p.category === 'Beauty Specialist' ? 'rgba(147, 51, 234, 0.1)' :
+                         p.category === 'Health & Pharmacy' ? 'rgba(16, 185, 129, 0.1)' :
+                         'rgba(59, 130, 246, 0.1)';
+    
+    const categoryBorder = p.category === 'Beauty Specialist' ? 'rgba(147, 51, 234, 0.3)' :
+                          p.category === 'Health & Pharmacy' ? 'rgba(16, 185, 129, 0.3)' :
+                          'rgba(59, 130, 246, 0.3)';
+
+    return `
+      <div class="product" style="background:${categoryColor};border-color:${categoryBorder};">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+          <div class="product-title">${p.store_icon} ${p.title}</div>
+          <div class="tag" style="font-size:10px;padding:2px 6px;">${p.category}</div>
+        </div>
+        <div class="muted" style="margin-bottom:8px;">
+          <strong>Store:</strong> ${p.store}<br>
+          <strong>Price:</strong> ${p.price}<br>
+          <strong>Rating:</strong> ${p.rating}
+        </div>
+        ${p.ingredient ? `<div style="font-size:11px;color:var(--accent);margin-bottom:6px;">💊 ${p.ingredient}</div>` : ''}
+        <a target="_blank" href="${p.url}" class="secondary" style="width:100%;text-align:center;padding:8px;border-radius:8px;text-decoration:none;display:block;">
+          🛒 Buy Now on ${p.store}
+        </a>
+      </div>
+    `;
+  }).join("");
+
+  resultContent.innerHTML = `
+    <div style="margin-bottom:12px;padding:12px;background:rgba(34,197,94,0.1);border-radius:8px;border:1px solid rgba(34,197,94,0.3);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <b>Patient:</b> ${userProfile.name}<br>
+          <span class="muted">${userProfile.city} • Self-reported: ${userProfile.skin_type}</span>
+        </div>
+        <div class="tag" style="background:rgba(34,197,94,0.2);">Analysis Complete</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div>
+        <b>🔬 AI Detected Skin Type:</b><br>
+        <span style="font-size:18px;color:var(--accent);">${skin}</span>
+      </div>
+      <div>
+        <b>⚠️ Severity Level:</b><br>
+        <span style="font-size:18px;color:${sev < 0.3 ? 'var(--success)' : sev < 0.7 ? 'var(--warning)' : 'var(--error)'};">${sevLabel}</span>
+      </div>
+    </div>
+
+    <b>🎯 Detected Issues:</b> ${issues}<br>
+    <span class="muted">Analysis Mode: ${d.explain?.mode || "unknown"} • Confidence Score: ${typeof sev === 'number' ? Math.round(sev * 100) + '%' : 'N/A'}</span>
+
+    <h4 style="margin-top:16px;">📊 Issue Confidence Levels</h4>
+    ${confHtml || '<div class="muted">No detailed confidence data available.</div>'}
+
+    <h4 style="margin-top:16px;">💊 Recommended Ingredients</h4>
+    <div style="margin-top:8px;">
+      ${ings || '<div class="muted">No specific ingredients recommended.</div>'}
+    </div>
+
+    <h4 style="margin-top:16px;">🛒 Personalized Product Recommendations</h4>
+    <div class="muted" style="margin-bottom:12px;">
+      Direct links to buy recommended products from trusted platforms • Total: ${allProducts.length} products
+    </div>
+    
+    <!-- Product Categories Filter -->
+    <div style="margin-bottom:16px;">
+      <button class="ghost" onclick="filterProducts('all')" id="filterAll" style="margin:2px;font-size:12px;padding:4px 8px;background:var(--accent);color:#052e16;">All Products</button>
+      <button class="ghost" onclick="filterProducts('specific_product')" id="filterSpecific" style="margin:2px;font-size:12px;padding:4px 8px;">🎯 Specific Products</button>
+      <button class="ghost" onclick="filterProducts('skin_type_match')" id="filterSkinType" style="margin:2px;font-size:12px;padding:4px 8px;">🧴 For Your Skin Type</button>
+      <button class="ghost" onclick="filterProducts('issue_specific')" id="filterIssues" style="margin:2px;font-size:12px;padding:4px 8px;">💊 For Your Concerns</button>
+    </div>
+    
+    <div id="productContainer" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;">
+      ${products || '<div class="muted">No products available at the moment.</div>'}
+    </div>
+    
+    <div class="banner" style="margin-top:16px;background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.3);">
+      <strong>🛍️ Shopping Tips:</strong><br>
+      • Compare prices across platforms for best deals<br>
+      • Check product reviews and ratings before purchasing<br>
+      • Look for combo offers and discounts<br>
+      • Verify product authenticity on official stores
+    </div>
+
+    <div class="banner" style="margin-top:20px;">
+      <b>🏥 Need Professional Consultation?</b><br>
+      For serious skin concerns, we recommend consulting a qualified dermatologist in ${userProfile.city}.
+      <br>
+      <div class="row" style="margin-top:8px;">
+        <button class="secondary" type="button" onclick="openDerm()">
+          📍 Find Dermatologists Near Me
+        </button>
+        <button class="ghost" type="button" onclick="switchTab('dermatologists')">
+          🔍 Advanced Doctor Search
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function openDerm() {
+let allProducts = [];
+
+function filterProducts(type) {
+  const container = document.getElementById('productContainer');
+  if (!container || !allProducts.length) return;
+  
+  // Update button states
+  document.querySelectorAll('[id^="filter"]').forEach(btn => {
+    btn.style.background = 'rgba(148,163,184,0.15)';
+    btn.style.color = 'var(--text)';
+  });
+  
+  const activeBtn = document.getElementById(`filter${type.charAt(0).toUpperCase() + type.slice(1).replace('_', '')}`);
+  if (activeBtn) {
+    activeBtn.style.background = 'var(--accent)';
+    activeBtn.style.color = '#052e16';
+  }
+  
+  // Filter products
+  let filteredProducts = allProducts;
+  if (type !== 'all') {
+    filteredProducts = allProducts.filter(p => p.search_type === type);
+  }
+  
+  // Re-render products
+  container.innerHTML = filteredProducts.map(p => {
+    const categoryColor = p.category === 'Beauty Specialist' ? 'rgba(147, 51, 234, 0.1)' :
+                         p.category === 'Health & Pharmacy' ? 'rgba(16, 185, 129, 0.1)' :
+                         'rgba(59, 130, 246, 0.1)';
+    
+    const categoryBorder = p.category === 'Beauty Specialist' ? 'rgba(147, 51, 234, 0.3)' :
+                          p.category === 'Health & Pharmacy' ? 'rgba(16, 185, 129, 0.3)' :
+                          'rgba(59, 130, 246, 0.3)';
+
+    return `
+      <div class="product" style="background:${categoryColor};border-color:${categoryBorder};">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+          <div class="product-title">${p.store_icon} ${p.title}</div>
+          <div class="tag" style="font-size:10px;padding:2px 6px;">${p.category}</div>
+        </div>
+        <div class="muted" style="margin-bottom:8px;">
+          <strong>Store:</strong> ${p.store}<br>
+          <strong>Price:</strong> ${p.price}<br>
+          <strong>Rating:</strong> ${p.rating}
+        </div>
+        ${p.ingredient ? `<div style="font-size:11px;color:var(--accent);margin-bottom:6px;">💊 ${p.ingredient}</div>` : ''}
+        <a target="_blank" href="${p.url}" class="secondary" style="width:100%;text-align:center;padding:8px;border-radius:8px;text-decoration:none;display:block;">
+          🛒 Buy Now on ${p.store}
+        </a>
+      </div>
+    `;
+  }).join('') || '<div class="muted">No products found for this filter.</div>';
+}
+  let q = "dermatologist";
+  if (userProfile && (userProfile.city || userProfile.address)) {
+    q += " near " + [userProfile.address, userProfile.city].filter(Boolean).join(", ");
+  } else {
+    q += " near me";
+  }
+  const url = "https://www.google.com/maps/search/" + encodeURIComponent(q);
+  window.open(url, "_blank");
+}
+
+function openGoogleMaps() {
+  const city = document.getElementById('derm_city').value.trim();
+  const address = document.getElementById('derm_address').value.trim();
+  
+  let query = 'dermatologist';
+  if (city || address) {
+    query += ' near ' + [address, city].filter(Boolean).join(', ');
+  } else {
+    query += ' near me';
+  }
+  
+  const url = 'https://www.google.com/maps/search/' + encodeURIComponent(query);
+  window.open(url, '_blank');
+}
+
+// History functionality
+document.getElementById('historyForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const contact = document.getElementById('history_contact').value.trim();
+  
+  if (!contact) {
+    alert('Please enter a contact number');
+    return;
+  }
+  
+  const contactValidation = validateContact(contact);
+  if (!contactValidation.valid) {
+    alert(contactValidation.message);
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/history/${contact}`);
+    const data = await response.json();
+    
+    if (response.ok) {
+      displayHistory(data);
+    } else {
+      let errorMessage = 'Error loading history';
+      if (data.detail) {
+        if (typeof data.detail === 'string') {
+          errorMessage = data.detail;
+        } else if (typeof data.detail === 'object') {
+          errorMessage = JSON.stringify(data.detail);
+        }
+      }
+      document.getElementById('historyResults').innerHTML = `
+        <div class="muted">Error: ${errorMessage}</div>
+      `;
+    }
+  } catch (error) {
+    console.error('History error:', error);
+    document.getElementById('historyResults').innerHTML = `
+      <div class="muted">${getErrorMessage(error, 'Failed to load history. Please try again.')}</div>
+    `;
+  }
+});
+
+function displayHistory(data) {
+  const resultsDiv = document.getElementById('historyResults');
+  
+  if (data.history.length === 0) {
+    resultsDiv.innerHTML = `
+      <div class="muted">No analysis history found for contact ${data.contact}.</div>
+    `;
+    return;
+  }
+  
+  let html = `
+    <h4>Analysis History for ${data.contact}</h4>
+    <div class="muted" style="margin-bottom:12px;">Total analyses: ${data.total_analyses}</div>
+  `;
+  
+  data.history.forEach((item, index) => {
+    const date = new Date(item.analysis_date).toLocaleDateString();
+    const issues = Array.isArray(item.detected_issues) ? item.detected_issues.join(', ') : item.detected_issues;
+    
+    html += `
+      <div class="card" style="margin-bottom:12px;padding:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+          <div>
+            <strong>${item.name}</strong>
+            <div class="muted" style="font-size:11px;">${date}</div>
+          </div>
+          <div class="tag">${item.analysis_mode}</div>
+        </div>
+        <div><strong>Skin Type:</strong> ${item.skin_type}</div>
+        <div><strong>Issues:</strong> ${issues}</div>
+        <div><strong>Severity:</strong> ${(item.severity_score * 100).toFixed(0)}%</div>
+      </div>
+    `;
+  });
+  
+  resultsDiv.innerHTML = html;
+}
+
+async function deleteUserData() {
+  const contact = document.getElementById('history_contact').value.trim();
+  
+  if (!contact) {
+    alert('Please enter a contact number first');
+    return;
+  }
+  
+  if (!confirm(`Are you sure you want to permanently delete all data for contact ${contact}? This action cannot be undone.`)) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/data/${contact}`, {
+      method: 'DELETE'
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      alert(`Successfully deleted data for contact ${contact}`);
+      document.getElementById('historyResults').innerHTML = `
+        <div class="muted">Data deleted successfully.</div>
+      `;
+      document.getElementById('history_contact').value = '';
+    } else {
+      let errorMessage = 'Failed to delete data';
+      if (data.detail) {
+        if (typeof data.detail === 'string') {
+          errorMessage = data.detail;
+        } else if (typeof data.detail === 'object') {
+          errorMessage = JSON.stringify(data.detail);
+        }
+      }
+      alert(errorMessage);
+    }
+  } catch (error) {
+    console.error('Delete error:', error);
+    alert(getErrorMessage(error, 'Failed to delete data. Please try again.'));
+  }
+}
+
+// Dermatologist finder
+document.getElementById('dermForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const city = document.getElementById('derm_city').value.trim();
+  const address = document.getElementById('derm_address').value.trim();
+  
+  if (!city) {
+    alert('Please enter a city');
+    return;
+  }
+  
+  const dermResults = document.getElementById('dermResults');
+  dermResults.innerHTML = '<div class="spinner"></div> Finding dermatologists...';
+  
+  try {
+    let url = `/find-dermatologists?city=${encodeURIComponent(city)}`;
+    if (address) {
+      url += `&address=${encodeURIComponent(address)}`;
+    }
+    
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (response.ok && data.success) {
+      displayDermatologists(data);
+    } else {
+      let errorMessage = 'Failed to find dermatologists';
+      if (data.message) {
+        if (typeof data.message === 'string') {
+          errorMessage = data.message;
+        } else if (typeof data.message === 'object') {
+          errorMessage = JSON.stringify(data.message);
+        }
+      }
+      dermResults.innerHTML = `
+        <div class="muted">Error: ${errorMessage}</div>
+      `;
+    }
+  } catch (error) {
+    console.error('Dermatologist search error:', error);
+    dermResults.innerHTML = `
+      <div class="muted">${getErrorMessage(error, 'Failed to search for dermatologists. Please try again.')}</div>
+    `;
+  }
+});
+
+function displayDermatologists(data) {
+  const resultsDiv = document.getElementById('dermResults');
+  
+  if (data.dermatologists.length === 0) {
+    resultsDiv.innerHTML = `
+      <div class="muted">No dermatologists found in ${data.location.city}. Try a different city or use Google Maps.</div>
+    `;
+    return;
+  }
+  
+  let html = `
+    <h4>Dermatologists in ${data.location.city}</h4>
+    <div class="muted" style="margin-bottom:12px;">
+      Found ${data.total_found} results • Source: ${data.source}
+      ${data.message ? `<br><em>${data.message}</em>` : ''}
+    </div>
+  `;
+  
+  data.dermatologists.forEach(derm => {
+    const statusClass = derm.is_open === 'Open' ? 'status-open' : 
+                       derm.is_open === 'Closed' ? 'status-closed' : 'status-unknown';
+    
+    // Different styling based on source
+    const isSearchLink = derm.source === 'Search Link' || derm.source === 'General Search' || derm.source === 'Hospital Search' || derm.source === 'Basic Search';
+    const cardStyle = isSearchLink ? 'background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.3);' : '';
+    
+    html += `
+      <div class="card" style="margin-bottom:12px;padding:12px;${cardStyle}">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+          <div style="font-weight:600;font-size:16px;">${derm.name}</div>
+          <div class="tag" style="font-size:10px;">${derm.source}</div>
+        </div>
+        
+        <div style="margin:8px 0;">
+          <div class="muted">${derm.address}</div>
+          ${derm.rating > 0 ? `
+            <div style="margin-top:4px;">
+              <span style="color:var(--warning);">⭐ ${derm.rating}/5 (${derm.total_ratings} reviews)</span>
+              ${derm.is_open !== 'Unknown' ? `
+                <span style="margin-left:8px;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:500;" class="${statusClass}">${derm.is_open}</span>
+              ` : ''}
+            </div>
+          ` : ''}
+        </div>
+        
+        <div style="margin-top:12px;">
+          ${derm.phone !== 'Phone not available' && derm.phone !== 'Contact details available in search results' && derm.phone !== 'Contact hospital reception for appointments' ? `
+            <div style="margin-bottom:4px;"><strong>Phone:</strong> ${derm.phone}</div>
+          ` : derm.phone !== 'Phone not available' ? `
+            <div style="margin-bottom:4px;" class="muted">${derm.phone}</div>
+          ` : ''}
+          
+          ${derm.website ? `
+            <div style="margin-bottom:8px;"><strong>Website:</strong> <a href="${derm.website}" target="_blank">Visit Website</a></div>
+          ` : ''}
+          
+          <a href="${derm.maps_url}" target="_blank" class="primary" style="display:inline-block;padding:8px 16px;border-radius:8px;text-decoration:none;margin-top:4px;">
+            ${isSearchLink ? '🔍 Search on Google Maps' : '📍 View on Google Maps'}
+          </a>
+        </div>
+      </div>
+    `;
+  });
+  
+  // Add helpful tips
+  html += `
+    <div class="banner" style="margin-top:16px;background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);">
+      <strong>💡 Tips for Finding Dermatologists:</strong><br>
+      • Call ahead to check availability and book appointments<br>
+      • Ask about consultation fees and insurance coverage<br>
+      • Check if they specialize in your specific skin concern<br>
+      • Consider both private clinics and hospital dermatology departments<br>
+      • Read reviews and ratings before making an appointment
+    </div>
+  `;
+  
+  resultsDiv.innerHTML = html;
+}
+</script>
+</body>
+</html>

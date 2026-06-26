@@ -1,0 +1,110 @@
+{
+  "skin_rules": {
+    "Oily": {
+      "Acne": [
+        "Salicylic Acid",
+        "Niacinamide",
+        "Green Tea",
+        "Azelaic Acid (10%)",
+        "Benzoyl Peroxide (2.5%)"
+      ],
+      "Pigmentation": [
+        "Niacinamide",
+        "Vitamin C",
+        "Alpha Arbutin",
+        "Kojic Acid",
+        "SPF 50 Sunscreen"
+      ],
+      "Dullness": [
+        "Vitamin C",
+        "Niacinamide",
+        "Glycolic Acid (low % exfoliant)"
+      ]
+    },
+    "Dry": {
+      "Dryness": [
+        "Ceramides",
+        "Hyaluronic Acid",
+        "Squalane",
+        "Fragrance-free Moisturizer"
+      ],
+      "Wrinkles": [
+        "Retinol (low strength)",
+        "Peptides",
+        "Hyaluronic Acid"
+      ]
+    },
+    "Sensitive": {
+      "Redness": [
+        "Aloe Vera",
+        "Centella Asiatica",
+        "Panthenol (Vitamin B5)",
+        "Fragrance-free Moisturizer"
+      ],
+      "Acne": [
+        "Niacinamide (low %)",
+        "Azelaic Acid (10%)",
+        "Green Tea"
+      ]
+    },
+    "Normal": {
+      "Pigmentation": [
+        "Vitamin C",
+        "Niacinamide",
+        "Alpha Arbutin",
+        "SPF 50 Sunscreen"
+      ],
+      "Dullness": [
+        "Vitamin C",
+        "Niacinamide"
+      ]
+    },
+    "Combination": {
+      "Acne": [
+        "Salicylic Acid (face wash)",
+        "Niacinamide",
+        "Green Tea"
+      ],
+      "Pigmentation": [
+        "Niacinamide",
+        "Vitamin C (low %)",
+        "SPF 50 Sunscreen"
+      ]
+    }
+  },
+  "issue_rules": {
+    "Acne": [
+      "Salicylic Acid",
+      "Niacinamide",
+      "Green Tea",
+      "Azelaic Acid (10%)"
+    ],
+    "Pigmentation": [
+      "Vitamin C",
+      "Niacinamide",
+      "Alpha Arbutin",
+      "Kojic Acid",
+      "SPF 50 Sunscreen"
+    ],
+    "Dryness": [
+      "Hyaluronic Acid",
+      "Ceramides",
+      "Fragrance-free Moisturizer"
+    ],
+    "Dullness": [
+      "Vitamin C",
+      "Niacinamide"
+    ],
+    "Wrinkles": [
+      "Retinol (low strength)",
+      "Peptides",
+      "Hyaluronic Acid"
+    ],
+    "Redness": [
+      "Aloe Vera",
+      "Centella Asiatica",
+      "Panthenol (Vitamin B5)",
+      "Green Tea"
+    ]
+  }
+}
